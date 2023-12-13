@@ -4,7 +4,18 @@
  * the function should return a promise just like before
  */
 
-function sleep(milliseconds) {
+function sleep (seconds) {
+    return new Promise((resolve, reject) => {
+        setTimeout(resolve, seconds);
+    })
 }
+
+// follow the async await, it awaits until the function execution is finished
+async function sleepCompletely(time){
+    await sleep(time * 1000);
+    console.log(`Now the thread is active after ${time*1000} seconds`);
+}
+
+// sleepCompletely(5);
 
 module.exports = sleep;
