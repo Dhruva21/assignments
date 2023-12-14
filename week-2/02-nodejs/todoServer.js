@@ -41,9 +41,65 @@
  */
   const express = require('express');
   const bodyParser = require('body-parser');
-  
+  const fs = require('fs');
+  const port = 3000;
   const app = express();
-  
+ 
   app.use(bodyParser.json());
+  
+  // first we need to load the data from the json file which has todos array.
+  let data = fs.readFileSync('todos.json', 'utf-8');
+  let jsonData = JSON.parse(data);
+
+  // first api --> get request - /todos
+  app.get('/todos', (req, res) => {
+    if(jsonData.length == 0){
+      // improve the handling logic here and learn what is the response we need to send
+      res.json('No todos yet please add more todos!');
+    }else{
+      res.json({'Todos: ' : jsonData});
+    }
+  })
+
+  // second api GET /todos/:id - Retrieve a specific todo item by ID
+  app.get('/todos/:id', (req, res) => {
+    let id = req.params.id;
+    const todosLength = jsonData.length;
+    if(todosLength == 0){
+      res.json("There are no todos currently available!")
+    }else{
+      for(let i = 0 ; i < todosLength; i++){
+        if(jsonData[i].id == id){
+          res.json(jsonData[i].todo)
+        }
+      }
+      res.sendStatus(404).json(`Todo with ${id} not found in the current todos!`)
+    }
+  })
+
+  // third api POST /todos --> Request Body: { "title": "Buy groceries", "completed": false, description: "I should buy groceries" }
+  app.post('/todos', (req, res) => {
+    const title = req.body.title;
+    const status = req.body.completed;
+    const description = req.body.description;
+
+    let id = jsonData.length + 1;
+
+    jsonData.push({
+      "id": id,
+      "todo" : {
+        "title": title,
+        "completed": status,
+        "description": description
+      }
+    })
+
+    res.sendStatus(201).json(`Created todo with id: ${id}`);
+
+  })
+
+  app.listen(port, () => {
+    console.log(`Listening on Port: ${port}`);
+  })
   
   module.exports = app;
