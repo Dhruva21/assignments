@@ -16,6 +16,41 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const app = express();
+const port = 3000;
 
+const folder_path = './files';
 
+// get api endpoint to return the list of file names in files directory
+app.get('/files', (req, res) => {
+  fs.readdir(folder_path, (err, files) => {
+    if(err){
+      res.status(500).send('Error in fetching the files from folder');
+    }else{
+      res.json(files);
+    }
+  })
+})
+
+// get api by file name /file/:filename --> fetch this :filename by req.params.filename
+app.get('/file/:filename', (req, res) => {
+  const filename = req.params.filename;
+
+  // now read the contents from the filename
+  fs.readFile(folder_path + '/' + filename, 'utf-8', (err, data) => {
+    if(err){
+      res.status(404).send(`File not found`);
+    }else{
+      res.send(data);
+    }
+  })
+})
+
+// return 404 error code if there is any other route
+app.get('*', (req, res) => {
+  res.status(404).send('Route not found');
+})
+
+// app.listen(port, () => {
+//   console.log(`Server is listening on port: ${port}`)
+// })
 module.exports = app;
