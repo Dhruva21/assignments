@@ -48,58 +48,78 @@
   app.use(bodyParser.json());
   
   // first we need to load the data from the json file which has todos array.
-  let data = fs.readFileSync('todos.json', 'utf-8');
-  let jsonData = JSON.parse(data);
+  // let data = fs.readFileSync('todos.json', 'utf-8');
+  // let jsonData = JSON.parse(data);
+  let todos = [];
 
   // first api --> get request - /todos
   app.get('/todos', (req, res) => {
-    if(jsonData.length == 0){
-      // improve the handling logic here and learn what is the response we need to send
-      res.json('No todos yet please add more todos!');
-    }else{
-      res.json({'Todos: ' : jsonData});
-    }
+    res.send(todos);
   })
 
   // second api GET /todos/:id - Retrieve a specific todo item by ID
   app.get('/todos/:id', (req, res) => {
     let id = req.params.id;
-    const todosLength = jsonData.length;
-    if(todosLength == 0){
-      res.json("There are no todos currently available!")
+    const todo = todos.find(t => t.id === parseInt(id)); // instead I can run a for loop through the list of todos and find the id if present
+    if(!todo){
+      res.status(404).send()
     }else{
-      for(let i = 0 ; i < todosLength; i++){
-        if(jsonData[i].id == id){
-          res.json(jsonData[i].todo)
-        }
-      }
-      res.sendStatus(404).json(`Todo with ${id} not found in the current todos!`)
+      res.send(todo);
     }
   })
 
-  // third api POST /todos --> Request Body: { "title": "Buy groceries", "completed": false, description: "I should buy groceries" }
+  // third api POST /todos --> Request Body: { "title": "Buy groceries",  description: "I should buy groceries" }
   app.post('/todos', (req, res) => {
     const title = req.body.title;
-    const status = req.body.completed;
     const description = req.body.description;
 
-    let id = jsonData.length + 1;
-
-    jsonData.push({
-      "id": id,
-      "todo" : {
-        "title": title,
-        "completed": status,
-        "description": description
-      }
-    })
-
-    res.sendStatus(201).json(`Created todo with id: ${id}`);
+    const newTodo = {
+      id: Math.floor(Math.random() * 1000000), // unique id
+      title: title,
+      description: description
+    }
+    todos.push(newTodo);
+    res.status(201).json(newTodo);
 
   })
 
-  app.listen(port, () => {
-    console.log(`Listening on Port: ${port}`);
+  // fourth api updated /todos/:id
+  app.put('/todos/:id', (req, res) => {
+
+    const title = req.body.title;
+    const description = req.body.description;
+
+    // the best way is to find the index of the todo
+    // check for the todo if present else send 404 -> not found
+    let id = req.params.id;
+    const todoIndex = todos.findIndex(t => t.id === parseInt(id)); // instead I can run a for loop through the list of todos and find the id if present
+    if(todoIndex == -1){
+      res.status(404).send()
+    }else{ // if found update the todos 
+      todos[todoIndex].title = title;
+      todos[todoIndex].description = description;
+      res.json(todos[todoIndex]);
+    }
   })
+
+  // fifth delete /todos/:id
+  app.delete('/todos/:id', (req, res) => {
+    let id = req.params.id;
+    const todoIndex = todos.findIndex(t => t.id === parseInt(id));
+    if(todoIndex == -1){
+      res.status(404).send();
+    }else{
+      todos.splice(todoIndex, 1) // splice removes the element at current index, second parameter is the count to delete
+      res.status(200).send();
+    }
+  })
+
+  // for all other routes, return 404
+  app.use((req, res, next) => {
+    res.status(404).send();
+  });
+  // app.listen(port, () => {
+  //   console.log(`Listening on Port: ${port}`);
+  // })
   
   module.exports = app;
