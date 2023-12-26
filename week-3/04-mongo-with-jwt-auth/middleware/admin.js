@@ -21,7 +21,6 @@ function adminMiddleware(req, res, next) {
             res.status(500).send('Havent received any token.');
         }
     }catch(error){
-        console.log(error);
         res.status(500).send('Internal server error.');
     }
 }
