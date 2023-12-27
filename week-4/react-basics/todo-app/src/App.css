@@ -1,0 +1,13 @@
+.outer_div{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.inner_div {
+    text-align: center;
+  }
+
+.button{
+    color: blue;
+}
