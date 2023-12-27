@@ -13,7 +13,6 @@ function App() {
   }
 
   function updateTodo(e){
-    e.preventDefault();
     const newTodo = {
       id: todo.id,
       title: todo.title,
